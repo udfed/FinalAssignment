@@ -1,10 +1,23 @@
 package ClassManager.main;
 
+import java.awt.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class MD5 {
+public class Tools {
     private static int length = 10;
+
+    public static void initFont(Container container, Font font){
+        for (Component e : container.getComponents()){
+            e.setFont(font);
+            if (e instanceof Container){
+                Container e1 = (Container)e;
+                for (Component e2 : e1.getComponents()){
+                    e2.setFont(font);
+                }
+            }
+        }
+    }
 
     public static String getMD5(String plainText) {
         try {
@@ -37,6 +50,6 @@ public class MD5 {
     }
 
     public static void main(String[] args) {
-        System.out.println(MD5.getMD5("12345"));
+        System.out.println(Tools.getMD5("12345"));
     }
 }
