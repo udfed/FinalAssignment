@@ -15,4 +15,11 @@ public class FontSet {
                 UIManager.put(key, fontRes);
         }
     }
+
+    public static void initFont(Container container, Font font){
+        for (Component e : container.getComponents()){
+            e.setFont(font);
+            initFont((Container) e, font);
+        }
+    }
 }

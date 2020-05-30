@@ -1,5 +1,7 @@
 package ClassManager.main;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import javax.swing.table.DefaultTableModel;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -68,9 +70,9 @@ public class Student{
         );
     }
 
-    public static void fileRead(ArrayList<Student> stu){
+    public static void fileRead(String path, ArrayList<Student> stu){
         try {
-            FileInputStream is = new FileInputStream("src\\data.txt");
+            FileInputStream is = new FileInputStream(path);
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String str = null;
             while((str = br.readLine()) != null)
@@ -97,8 +99,8 @@ public class Student{
         System.out.println(this.toString() + score.toString());
     }
 
-    public DefaultTableModel getTable(){
-        return null;
+    public Object[] getData(){
+        return ArrayUtils.addAll(new Object[]{name, number, sex, age, height, weight}, score.getData());
     }
 
     @Override

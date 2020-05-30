@@ -44,28 +44,6 @@ public class Class{
         return null;
     }
 
-    public void getAllStudents(){
-        if (isEmpty())
-            System.out.println("该班级为空");
-        else{
 
-            System.out.println("姓名   学号      性别  年龄   身高  体重");
-            for (Student e : students)
-                e.outPut();
-        }
-    }
 
-    public void getFiveStudents(){
-        if (size < 5)
-            System.out.println("该班级少于5人");
-        else {
-            System.out.println("姓名   学号      性别  年龄   身高  体重");
-            int i = 5;
-            Random r = new Random();
-            while (i-- > 0) {
-                int n = r.nextInt(size);
-                students.get(n).outPut();
-            }
-        }
-    }
 }

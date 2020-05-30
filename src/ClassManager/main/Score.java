@@ -39,6 +39,11 @@ public class Score{
         this.technology = technology;
     }
 
+    public Object[] getData(){
+        return new Object[]{chinese, math, english, physics, chemistry,
+                biology, politics, history, geography, technology};
+    }
+
     @Override
     public String toString() {
         return String.format("%-4.1f\t%-4.1f\t%-4.1f\t%-4.1f\t%-4.1f\t%-4.1f\t%-4.1f\t%-4.1f\t%-4.1f\t%-4.1f\t",
