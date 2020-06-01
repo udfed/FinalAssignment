@@ -1,6 +1,7 @@
 package ClassManager.GUI;
 
 import ClassManager.main.Account;
+import ClassManager.main.FontSet;
 import ClassManager.main.MD5;
 
 import javax.swing.*;
@@ -8,10 +9,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.Enumeration;
+import java.util.Properties;
 
 public class LoginFrame extends JFrame {
 
-    private JLabel messageLabel = new JLabel("    ");
+    private JLabel messageLabel = new JLabel("   ");
     private JTextField usernameField = new JTextField(15);
     private JPasswordField passwordField = new JPasswordField(15);
 
@@ -52,6 +55,8 @@ public class LoginFrame extends JFrame {
 
         ActionListener registerListener = e -> {
             RegisterDialog registerDialog = new RegisterDialog(this);
+            FontSet.initFont(registerDialog, new Font("微软雅黑", Font.PLAIN, 20));
+            registerDialog.getMessageLabel().setFont(new Font("微软雅黑", Font.PLAIN, 15));
             registerDialog.setVisible(true);
         };
         registerButton.addActionListener(registerListener);
@@ -157,6 +162,23 @@ class RegisterListener implements ActionListener{
         registerDialog.getMessageLabel().setFont(new Font("微软雅黑", Font.PLAIN, 15));
         registerDialog.getMessageLabel().setForeground(Color.red);
 
+        try {
+            FileInputStream is = new FileInputStream("src\\account.properties");
+            Properties properties = new Properties();
+            properties.load(is);
+
+            String pwd = properties.getProperty(registerDialog.getUsernameField().getText());
+
+            if (pwd != null){
+                registerDialog.getMessageLabel().setText("用户名已存在");
+                return;
+            }
+
+
+        }catch (IOException e1){
+            e1.printStackTrace();
+        }
+
         if (registerDialog.getUsernameField().getText().isEmpty()){
             registerDialog.getMessageLabel().setText("用户名不能为空");
             return;
@@ -170,24 +192,8 @@ class RegisterListener implements ActionListener{
             return;
         }
 
-        try {
-            FileInputStream is = new FileInputStream("src\\account.txt");
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            String str = null;
 
-            while ((str = br.readLine()) != null){
-                if (registerDialog.getUsernameField().getText().equals(str.substring(0, str.indexOf(' ')))){
-                    registerDialog.getMessageLabel().setText("用户名已存在");
 
-                    br.close();
-                    is.close();
-
-                    return;
-                }
-            }
-        }catch (IOException e1){
-            e1.printStackTrace();
-        }
         if (new String(registerDialog.getPasswordField().getPassword())
                 .equals(new String(registerDialog.getConfirmField().getPassword()))){
 
@@ -195,15 +201,14 @@ class RegisterListener implements ActionListener{
                     MD5.getMD5(new String(registerDialog.getPasswordField().getPassword())));
 
             try {
-                FileOutputStream os = new FileOutputStream("src\\account.txt", true);
-                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os));
+                FileOutputStream os = new FileOutputStream("src\\account.properties", true);
 
-                bw.write(account.toString());
-                bw.newLine();
+                Properties properties = new Properties();
+                properties.setProperty(registerDialog.getUsernameField().getText(),
+                        MD5.getMD5(new String(registerDialog.getPasswordField().getPassword())));
+                properties.store(os, "");
 
-                bw.close();
                 os.close();
-
                 registerDialog.getMessageLabel().setText("注册成功！");
 
             } catch (IOException e1){
@@ -224,52 +229,47 @@ class LoginListener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        String username = loginFrame.getUsernameField().getText();
+        String password = new String(loginFrame.getPasswordField().getPassword());
 
         loginFrame.getMessageLabel().setFont(new Font("微软雅黑", Font.PLAIN, 15));
         loginFrame.getMessageLabel().setForeground(Color.red);
 
-        if (loginFrame.getUsernameField().getText().isEmpty()){
+        if (username.isEmpty()){
             loginFrame.getMessageLabel().setText("请输入用户名");
             return ;
         }
-        if (new String(loginFrame.getPasswordField().getPassword()).isEmpty()){
+        if (password.isEmpty()){
             loginFrame.getMessageLabel().setText("请输入密码");
             return ;
         }
 
-        Account currentAccount = new Account(loginFrame.getUsernameField().getText(),
-                MD5.getMD5(new String(loginFrame.getPasswordField().getPassword())));
+        Account currentAccount = new Account(username, MD5.getMD5(password));
 
         try {
-            FileInputStream is = new FileInputStream("src\\account.txt");
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            String str = null;
+            FileInputStream is = new FileInputStream("src\\account.properties");
 
-            boolean flag = true;
-            while((str = br.readLine()) != null && flag){
-                Account account = new Account(str);
+            Properties properties = new Properties();
+            properties.load(is);
 
-                if (currentAccount.equals(account)){
-                    MainFrame frame = new MainFrame();
-                    frame.setTitle("班级信息管理系统");
-                    frame.setUsername(loginFrame.getUsernameField().getText());
-                    frame.getUsernameLabel().setText("当前用户: " + loginFrame.getUsernameField().getText());
-                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    frame.setVisible(true);
+            String pwd = properties.getProperty(loginFrame.getUsernameField().getText());
 
-                    loginFrame.dispose();
+            if (pwd != null && pwd.equals(MD5.getMD5(new String(loginFrame.getPasswordField().getPassword())))) {
 
-                    flag = false;
-                }
+                MainFrame mainFrame = new MainFrame();
+                mainFrame.setTitle("班级信息管理系统");
+                mainFrame.getUsernameLabel().setText("当前用户: " + username);
+                mainFrame.setUsername(username);
+
+                mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                mainFrame.setVisible(true);
+                loginFrame.dispose();
             }
-
-            if (flag){
+            else {
                 loginFrame.getMessageLabel().setText("用户名或密码错误");
             }
 
             is.close();
-            br.close();
-
         } catch (IOException e1){
             e1.printStackTrace();
         }

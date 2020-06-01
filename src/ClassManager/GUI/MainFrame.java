@@ -5,9 +5,12 @@ import ClassManager.main.Student;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -19,14 +22,12 @@ import java.util.HashMap;
 
 public class MainFrame extends JFrame {
 
-    public static final int TABLE_ROWS = 10;
-    public static final int TABLE_COLUMNS = 17;
-
     private String username;
     private JLabel usernameLabel = new JLabel("当前用户: ");
     private DefaultTableModel tableModel = new DefaultTableModel();
-    private ArrayList<String> filePath = new ArrayList<>();
     private DefaultMutableTreeNode root  = new DefaultMutableTreeNode("班级管理");
+    private JTree classTree = new JTree(root);
+    private JTable table = new JTable(tableModel);
 
     public MainFrame() {
         //获取屏幕大小
@@ -52,36 +53,43 @@ public class MainFrame extends JFrame {
                 "英语", "物理", "化学", "生物", "政治", "历史", "地理", "技术"};
         tableModel.setColumnIdentifiers(tableTitle);
 
-        JTable table= new JTable(tableModel);
+        JScrollPane tableScrollPane = new JScrollPane(table);
+        FontSet.initFont(tableScrollPane, new Font("微软雅黑", Font.PLAIN, 12));
         table.getTableHeader().setReorderingAllowed(false);
         table.getTableHeader().setResizingAllowed(false);
-        table.getColumn("学号").setPreferredWidth(100);
+        table.getColumn("姓名").setPreferredWidth(90);
+        table.getColumn("学号").setPreferredWidth(110);
         table.getColumn("性别").setPreferredWidth(50);
         table.setRowHeight(25);
-        JScrollPane tableScrollPane = new JScrollPane(table);
+        ((DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();// 设置table内容居中
+        renderer.setHorizontalAlignment(JLabel.CENTER);
+        table.setDefaultRenderer(Object.class, renderer);
 
         //test
         ArrayList<Student> students = new ArrayList<>();
         Student.fileRead("src\\data.txt", students);
         DefaultMutableTreeNode node = new DefaultMutableTreeNode("class1");
+        root.add(node);
+        classTree.expandRow(0);
         for (Student e1 : students){
             node.add(new DefaultMutableTreeNode(new StudentNode(e1)));
             tableModel.addRow(e1.getData());
         }
+        setTitle("班级信息管理系统 [" + "class1" + "]");
 
         //树状结构
-        JTree classTree = new JTree(root);
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(classTree);
 
         //菜单栏
         JMenuBar menuBar = new JMenuBar();
-        menuBar.setFont(new Font("微软雅黑", Font.PLAIN, 10));
         setJMenuBar(menuBar);
         JMenu fileMenu = new JMenu("文件");
         menuBar.add(fileMenu);
         JMenuItem importItem = new JMenuItem("导入");
         fileMenu.add(importItem);
+        FontSet.initFont(menuBar, new Font("宋体", Font.PLAIN, 12));
 
         importItem.addActionListener(e -> {
             ImportDialog importDialog = new ImportDialog(this);
@@ -137,17 +145,18 @@ public class MainFrame extends JFrame {
         return usernameLabel;
     }
 
-    public ArrayList<String> getFilePath() {
-        return filePath;
+    public JTree getClassTree() {
+        return classTree;
+    }
+
+    public JTable getTable() {
+        return table;
     }
 
     public DefaultMutableTreeNode getRoot() {
         return root;
     }
 
-    public DefaultTableModel getTableModel() {
-        return tableModel;
-    }
 
     //    public void updateSample() {
 //        String fontFace = (String) face.getSelectedItem();
@@ -163,10 +172,6 @@ public class MainFrame extends JFrame {
         }catch (Exception e){
             e.printStackTrace();
         }
-        Font font = new Font("微软雅黑", Font.PLAIN, 20);
-        FontSet.GlobalFontSetting(font);
-        UIManager.put("Menu.font", new Font("宋体", Font.PLAIN, 12));//设置Menubar的字体
-        UIManager.put("MenuItem.font", new Font("宋体", Font.PLAIN, 12));//设置MenuItem的字体
         MainFrame mainFrame = new MainFrame();
         mainFrame.setTitle("班级信息管理系统");
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -232,15 +237,28 @@ class ImportDialog extends JDialog {
                 messageLabel.setText("请选择文件");
             } else {
                 //导入实现
-                owner.getFilePath().add(pathField.getText());
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(classnameField.getText());
+                ClassNode classNode = new ClassNode(classnameField.getText());
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(classNode);
                 owner.getRoot().add(node);
+
+//                owner.getClassTree().expandRow(0);
+//                owner.getClassTree().expandRow(1);
+                //System.out.println(owner.getRoot().getChildCount());
                 ArrayList<Student> students = new ArrayList<>();
                 Student.fileRead(pathField.getText(), students);
                 for (Student e1 : students){
                     node.add(new DefaultMutableTreeNode(new StudentNode(e1)));
-                    owner.getTableModel().addRow(e1.getData());
+                    classNode.getTableModel().addRow(e1.getData());
                 }
+
+
+                owner.getTable().setModel(classNode.getTableModel());
+                owner.getTable().getColumn("姓名").setPreferredWidth(90);
+                owner.getTable().getColumn("学号").setPreferredWidth(110);
+                owner.getTable().getColumn("性别").setPreferredWidth(50);
+                owner.getTable().setRowHeight(25);
+
+                owner.setTitle("班级信息管理系统 [" + classnameField.getText() + "]");
                 dispose();
             }
         });
@@ -252,7 +270,27 @@ class ImportDialog extends JDialog {
     }
 }
 
+class ClassNode{
+    private String name;
+    private DefaultTableModel tableModel = new DefaultTableModel();
 
+    protected ClassNode(String name){
+        this.name = name;
+        String[] tableTitle = new String[]{
+                "姓名", "学号", "性别", "年龄", "身高", "体重", "语文", "数学",
+                "英语", "物理", "化学", "生物", "政治", "历史", "地理", "技术"};
+        tableModel.setColumnIdentifiers(tableTitle);
+    }
+
+    public DefaultTableModel getTableModel() {
+        return tableModel;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+}
 class StudentNode {
     private Student student;
 

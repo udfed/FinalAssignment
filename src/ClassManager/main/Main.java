@@ -13,14 +13,12 @@ public class Main {
 //
 //        Student.arrayPrint(stu);
         try {
-            UIManager.setLookAndFeel("javax.swing.plaf.windows.WindowsLookAndFeel");
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         }catch (Exception e){
             e.printStackTrace();
         }
+
         Font font = new Font("微软雅黑", Font.PLAIN, 20);
-        FontSet.GlobalFontSetting(font);
-     //   UIManager.put("Label.font", new Font("微软雅黑", Font.PLAIN, 20));
-//        UIManager.put("TextField.font", new Font("Consolas", Font.PLAIN, 20));
 
         EventQueue.invokeLater(() -> {
 
@@ -28,7 +26,8 @@ public class Main {
             frame.setTitle("班级信息管理系统");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
-
+            FontSet.initFont(frame, font);
+            frame.getMessageLabel().setFont(new Font("微软雅黑", Font.PLAIN, 15));
         });
 
 
