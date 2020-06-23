@@ -163,7 +163,7 @@ class RegisterListener implements ActionListener{
         registerDialog.getMessageLabel().setForeground(Color.red);
 
         try {
-            FileInputStream is = new FileInputStream("src\\account.properties");
+            FileInputStream is = new FileInputStream("src\\account\\account.properties");
             Properties properties = new Properties();
             properties.load(is);
 
@@ -201,7 +201,7 @@ class RegisterListener implements ActionListener{
                     MD5.getMD5(new String(registerDialog.getPasswordField().getPassword())));
 
             try {
-                FileOutputStream os = new FileOutputStream("src\\account.properties", true);
+                FileOutputStream os = new FileOutputStream("src\\account\\account.properties", true);
 
                 Properties properties = new Properties();
                 properties.setProperty(registerDialog.getUsernameField().getText(),
@@ -210,6 +210,10 @@ class RegisterListener implements ActionListener{
 
                 os.close();
                 registerDialog.getMessageLabel().setText("注册成功！");
+
+                String str = new String("src\\account\\" + registerDialog.getUsernameField().getText());
+                File dir = new File(str);
+                dir.mkdir();
 
             } catch (IOException e1){
                 e1.printStackTrace();
@@ -247,7 +251,7 @@ class LoginListener implements ActionListener {
         Account currentAccount = new Account(username, MD5.getMD5(password));
 
         try {
-            FileInputStream is = new FileInputStream("src\\account.properties");
+            FileInputStream is = new FileInputStream("src\\account\\account.properties");
 
             Properties properties = new Properties();
             properties.load(is);
@@ -263,6 +267,17 @@ class LoginListener implements ActionListener {
 
                 mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 mainFrame.setVisible(true);
+
+                File dir = new File("src\\account\\" + username);
+                String[] files = dir.list();
+                for (int i = 0; i < files.length; ++i){
+                    String str = files[i];
+                    int begin = str.lastIndexOf('\\') + 1;
+                    int end = str.lastIndexOf('.');
+                    str = str.substring(begin, end);
+                    MainFrame.importData(mainFrame, str, dir.toPath() + "\\" + files[i]);
+                }
+
                 loginFrame.dispose();
             }
             else {

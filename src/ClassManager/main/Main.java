@@ -8,10 +8,6 @@ import java.awt.*;
 public class Main {
     public static void main(String[] args) {
 
-//        ArrayList<Student> stu = new ArrayList<>();
-//        Student.fileRead(stu);
-//
-//        Student.arrayPrint(stu);
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         }catch (Exception e){
@@ -31,6 +27,10 @@ public class Main {
         });
 
 
+//        ArrayList<Student> stu = new ArrayList<>();
+//        Student.fileRead(stu);
+//
+//        Student.arrayPrint(stu);
 
 //        Class myclass = new Class(stu);
 

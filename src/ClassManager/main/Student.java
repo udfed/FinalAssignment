@@ -23,7 +23,7 @@ public class Student{
     private double weight;
     private Score score = new Score();
 
-    Student(){
+    public Student(){
         name = "";
         number = "";
         sex = "";
@@ -32,7 +32,7 @@ public class Student{
         weight = 0;
     }
 
-    Student(String name, String number, String sex, int age, double height, double weight, Score score){
+    public Student(String name, String number, String sex, int age, double height, double weight, Score score){
         this.name = name;
         this.number = number;
         this.sex = sex;
@@ -42,7 +42,7 @@ public class Student{
         this.score = score;
     }
 
-    Student(String str){
+    public Student(String str){
         int[] pos = new int[items];
         pos[0] = 0;
         int i = 1;
